@@ -41,11 +41,28 @@ Set the stopping criteria to be xtranspose*s<tolerance ; tolerance = 0.0001 for 
 Then iterate on the above using while loop maybe and track the values at the end in order to draw some conclusions using 
 the number of iterations and function values. 
 '''
+import numpy as np
+from numpy.linalg import inv as inv
 
+#### First Trial:-d
+# Constraints paramters + slack variables
+A=np.array([[1],[1],[1]])
 
-#### First Trial:-
+b=np.array([6])
 
+## Initialize values for initial point
+x=np.array([[5],[6],[1]])
 
+s=np.array([[1],[1],[1]])
 
+## Set algorithm paramters
+mu=0.5
+alpha=0.9
 
+StoppingCriteria=x.T@s
+print(StoppingCriteria)
 
+Tolerance=0.01
+while StoppingCriteria<Tolerance:
+
+    ## Solve the System of Equation using built-in function for Newton Raphson
