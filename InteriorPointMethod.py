@@ -45,31 +45,97 @@ import numpy as np
 from numpy.linalg import inv as inv
 from sympy import *
 
+def UpdateValues( x,y,s,AllDeltas):
+    """
+    docstring
+    """
+    x=x+alpha*AllDeltas[:x.shape[0]]
+    y=y+alpha*AllDeltas[x.shape[0]:x.shape[0]+y.shape[0]]
+    s=s+alpha*AllDeltas[x.shape[0]+y.shape[0]:x.shape[0]+s.shape[0]+y.shape[0]]
+    Xmat=Matricize(x)
+    Smat=Matricize(s)
+    return x,s,y,Xmat,Smat
+
+
+def Matricize( VectorToMatrix):
+    """
+    docstring
+    """
+    Mat=np.diagflat(VectorToMatrix)
+    return Mat
+    
+def GenerateAugmentedSystem(Zero1, A,Identity, Zero2,Zero3,Smat, Zero4,Xmat):
+    """
+    docstring
+    """
+    AugmentedSubystem1=np.concatenate((Zero1, A.T,Identity), axis=1)
+    AugmentedSubystem2=np.concatenate((A, Zero2,Zero3), axis=1)
+    AugmentedSubystem3=np.concatenate((Smat, Zero4,Xmat), axis=1)
+    AugmentedSystem=np.concatenate((AugmentedSubystem1,AugmentedSubystem2,AugmentedSubystem3),axis=0)
+    return AugmentedSystem
+
+
+
+def InitializeZerosAndIdentities(A,s,x):
+    """
+    docstring
+    """
+    Zero1=np.zeros((A.shape[1],A.shape[1])) ## This for the most left upper zeros in the augmented system
+    Identity=np.eye(A.shape[1]) ## This is for the most right upper identity in the augmented system
+    Zero2=np.zeros((1,1)) ## This is hard coded for now, but I need to generate it automatically later on
+    Zero3=np.zeros((1,x.shape[0]))
+    Zero4=np.zeros((s.shape[0],1))
+    return Zero1,Identity,Zero2,Zero3,Zero4
+
 
 #### First Trial:-d
 # Constraints paramters + slack variables
-A=np.array([[1],[1],[1]])
+A=np.array([[1,1,1]])
 
 b=np.array([6])
 
 ## Initialize values for initial point
-x=np.array([[5],[6],[1]])
+x=np.array([[5],[6],[1]]) 
 
-s=np.array([[1],[1],[1]])
+s=np.array([[1],[1],[1]])  ## This is initialized as identity
+y=np.zeros(A.shape[0])
+Xmat=Matricize(x)
+Smat=Matricize(s)
+
+################# 
+deltaX=np.zeros((Xmat.shape[1],1))
+deltaS=np.zeros((Smat.shape[1],1))
+deltaY=np.zeros((A.shape[0],1)) ### This is the y vector but I didn't initialize it before, I THINK THE DIMENSION IS 1 HERE ACCORDING TO THE NUMBER OF CONSTRANTS
+
 
 ## Set algorithm paramters
 Sigma=0.5
 alpha=0.9
 
 StoppingCriteria=x.T@s
-print(StoppingCriteria)
+print(StoppingCriteria[0])
 
-mu=StoppingCriteria/x.shape[0]  ## This is the duality measure
-Tolerance=0.01
-while StoppingCriteria<Tolerance:
+Tolerance=0.001
+
+### I'll solve the augmented system first and in the next version I'll implement Cholesky Factorization
+Zero1,Identity,Zero2,Zero3,Zero4=InitializeZerosAndIdentities(A,s,x)
+
+while StoppingCriteria[0]<Tolerance:
+    
+    print(StoppingCriteria)
+    mu=StoppingCriteria/x.shape[0]
+    AugmentedSystem=GenerateAugmentedSystem(Zero1, A,Identity, Zero2,Zero3,Smat, Zero4,Xmat)
+    #This is to edit the solution column
+    rXSe=Xmat@Smat@np.ones((Xmat.shape[0],1))
+    rMu=mu*Sigma*np.ones((Xmat.shape[0],1))
+    rLast=-rXSe+rMu
+    AugmentedB=np.concatenate((deltaX,deltaY,rLast),axis=0) ## This is not so corrected you need to initialize zeros and the 
+    ## last values will be -XSe+ mu*sigma*e Because this is solution.
+    ## But in terms of the deltas, they will come from the function return.
+    ## Anyways I need to proceed of implying the solving function.
+    StoppingCriteria=x.T@s
 
 
-    ## Solve the System of Equation using built-in function for Newton Raphson
 
 
 
@@ -77,9 +143,15 @@ while StoppingCriteria<Tolerance:
 
 
 
+#####################################################################################################
+## Solve the system and Update Vecttor Values
+#####################################################################################################
 
 
 
-    ### This will be calculated at each iteration
+
+
+    AllDeltas = np.linalg.solve(AugmentedSystem,AugmentedB)
+    x,y,s,Xmat,Smat=UpdateValues(x,y,s,AllDeltas)
     StoppingCriteria=x.T@s
     mu=StoppingCriteria/x.shape[0]
