@@ -81,9 +81,9 @@ def InitializeZerosAndIdentities(A,s,x):
     """
     Zero1=np.zeros((A.shape[1],A.shape[1])) ## This for the most left upper zeros in the augmented system
     Identity=np.eye(A.shape[1]) ## This is for the most right upper identity in the augmented system
-    Zero2=np.zeros((1,1)) ## This is hard coded for now, but I need to generate it automatically later on
-    Zero3=np.zeros((1,x.shape[0]))
-    Zero4=np.zeros((s.shape[0],1))
+    Zero2=np.zeros((A.shape[0],A.shape[0])) ## This is hard coded for now, but I need to generate it automatically later on
+    Zero3=np.zeros((A.shape[0],x.shape[0]))
+    Zero4=np.zeros((s.shape[0],A.shape[0]))
     return Zero1,Identity,Zero2,Zero3,Zero4
 
 def GeneratAugmentedB(A,b,c,s,x,y, Xmat):
@@ -100,16 +100,18 @@ def GeneratAugmentedB(A,b,c,s,x,y, Xmat):
 
 #### First Trial:-d
 # Constraints paramters + slack variables
-A=np.array([[1,1,1]])
-b=np.array([6])
+A=np.array([[2,1,1,0],[1,3,0,1]])
+print(A.shape[0])
+
+b=np.array([[8],[8]])
 ## Initialize values for initial point 
 ## I tried multiple arbitrary initial points and it's working awesome ^_^ 
-x=np.array([[3],[3],[3]]) 
-s=np.array([[1],[1],[1]])  ## This is initialized as identity
-y=np.ones((1,1))
+x=np.array([[3],[3],[3],[4]]) 
+s=np.array([[1],[1],[1],[3]])  ## This is initialized as identity
+y=np.ones((2,1))
 Xmat=Matricize(x)
 Smat=Matricize(s)
-c=np.array([[-1.1],[1],[0]])
+c=np.array([[-30],[-20],[0],[0]])
 ################# 
  ### This is the y vector but I didn't initialize it before, I THINK THE DIMENSION IS 1 HERE ACCORDING TO THE NUMBER OF CONSTRANTS
 
