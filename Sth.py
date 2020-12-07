@@ -45,16 +45,17 @@ import numpy as np
 from numpy.linalg import inv as inv
 from sympy import *
 
-def UpdateValues( x,y,s,AllDeltas,alpha):
+def UpdateValues( x,y,s,AllDeltas,alphaP,AlphaD):
     """
     docstring
     """
-    x=x+alpha*AllDeltas[:x.shape[0]]
-    y=y+alpha*AllDeltas[x.shape[0]:x.shape[0]+y.shape[0]]
-    s=s+alpha*AllDeltas[x.shape[0]+y.shape[0]:x.shape[0]+s.shape[0]+y.shape[0]]
+    x=x+0.5*AllDeltas[:x.shape[0]]
+    y=y+AlphaD*AllDeltas[x.shape[0]:x.shape[0]+y.shape[0]]
+    s=s+AlphaD*AllDeltas[x.shape[0]+y.shape[0]:x.shape[0]+s.shape[0]+y.shape[0]]
     Xmat=Matricize(x)
     Smat=Matricize(s)
     return x,y,s,Xmat,Smat
+
 
 def Matricize( VectorToMatrix):
     """
@@ -73,6 +74,7 @@ def GenerateAugmentedSystem(Zero1, A,Identity, Zero2,Zero3,Smat, Zero4,Xmat):
     AugmentedSystem=np.concatenate((AugmentedSubystem1,AugmentedSubystem2,AugmentedSubystem3),axis=0)
     return AugmentedSystem
 
+
 def InitializeZerosAndIdentities(A,s,x):
     """
     docstring
@@ -84,7 +86,7 @@ def InitializeZerosAndIdentities(A,s,x):
     Zero4=np.zeros((s.shape[0],A.shape[0]))
     return Zero1,Identity,Zero2,Zero3,Zero4
 
-def GeneratAugmentedB(A,b,c,s,x,y, Xmat,Smat,mu,Sigma):
+def GeneratAugmentedB(A,b,c,s,x,y, Xmat,Sigma,mu):
     """
     docstring
     """
@@ -96,38 +98,101 @@ def GeneratAugmentedB(A,b,c,s,x,y, Xmat,Smat,mu,Sigma):
     AugmentedB=np.concatenate((-rc,-rb,rLast),axis=0)
     return AugmentedB
 
-def GeneratAugmentedBAffine(A,b,c,s,x,y, Xmat,Smat):
+##############################################################################################
+### Second Case
+##############################################################################################
+# A=np.array([[1,1,1]])
+# b=np.array([6])
+# x=np.array([[3],[3],[3]]) 
+# s=np.array([[1],[1],[1]]) 
+# y=np.ones((1,1))
+# Xmat=Matricize(x)
+# Smat=Matricize(s)
+# c=np.array([[-1.1],[1],[0]])
+##############################################################################################
 
+
+
+##############################################################################################
+### Second Case
+##############################################################################################
+# Constraints paramters + slack variables
+A=np.array([[2,1,1,0],[1,3,0,1]])
+print(A.shape[0])
+
+b=np.array([[8],[8]])
+## Initialize values for initial point 
+## I tried multiple arbitrary initial points and it's working awesome ^_^ 
+x=np.array([[3],[1],[0],[0]]) 
+s=np.array([[1],[1],[1],[1]])  ## This is initialized as identity
+y=np.ones((2,1))
+c=np.array([[-30],[-20],[0],[0]])
+##############################################################################################
+
+
+Xmat=Matricize(x)
+Smat=Matricize(s)
+
+################# 
+ ### This is the y vector but I didn't initialize it before, I THINK THE DIMENSION IS 1 HERE ACCORDING TO THE NUMBER OF CONSTRANTS
+
+## Set algorithm paramters
+Sigma=0.5
+alpha=0.7
+StoppingCriteria=x.T@s
+print(StoppingCriteria[0])
+Tolerance=0.01
+### I'll solve the augmented system first and in the next version I'll implement Cholesky Factorization
+Zero1,Identity,Zero2,Zero3,Zero4=InitializeZerosAndIdentities(A,s,x)
+AugmentedSystem=GenerateAugmentedSystem(Zero1, A,Identity, Zero2,Zero3,Smat, Zero4,Xmat)
+i=0
+
+
+
+def AdaptiveStepSize( x,s,y,AllDeltas):
     """
     docstring
     """
-    rXSe=Xmat@Smat@np.ones((Xmat.shape[0],1))
-    rc=A.T@y+s-c
-    rb=A@x-b
-    rLast=-rXSe
-    AugmentedB=np.concatenate((-rc,-rb,rLast),axis=0)
-    return AugmentedB
+    alphaPrimal=min(1,-np.min(x/AllDeltas[:x.shape[0]]))
+    alphaDual=min(1,-np.min(s/AllDeltas[x.shape[0]+y.shape[0]:x.shape[0]+s.shape[0]+y.shape[0]]))
+    return alphaPrimal,alphaDual
 
-def Iterate( A,b,c,s,x,y,Zero1,Identity, Zero2,Zero3,Smat, Zero4,Xmat,Sigma,alpha):
+def AdaptiveCenteringParameter( x,s,y,AllDeltas,mu):
     """
     docstring
     """
-    StoppingCriteria=x.T@s
+    alphaPrimal,alphaDual=AdaptiveStepSize( x,s,y,AllDeltas)
+    mux=x+alphaPrimal*AllDeltas[:x.shape[0]]
+    mus=s+alphaDual*AllDeltas[x.shape[0]+y.shape[0]:x.shape[0]+s.shape[0]+y.shape[0]]
+    muaff=mux.T@mus
+    Sigma=(muaff/mu)
+    return Sigma
+
+#### Trial
+
+
+while StoppingCriteria[0]>Tolerance or i>1000:
+    i=i+1
+    print(i)
     mu=StoppingCriteria/x.shape[0]
     AugmentedSystem=GenerateAugmentedSystem(Zero1, A,Identity, Zero2,Zero3,Smat, Zero4,Xmat)
-    AugmentedB=GeneratAugmentedB(A,b,c,s,x,y, Xmat,Smat,mu,Sigma)
+    AugmentedB=GeneratAugmentedB(A,b,c,s,x,y, Xmat,Sigma,mu) ## This is not so corrected you need to initialize zeros and the 
+    ## last values will be -XSe+ mu*sigma*e Because this is solution.
+    ## But in terms of the deltas, they will come from the function return.
+    ## Anyways I need to proceed of implying the solving function.
     AllDeltas = np.linalg.solve(AugmentedSystem,AugmentedB)
-    x,y,s,Xmat,Smat=UpdateValues(x,y,s,AllDeltas,alpha)
-    return A,b,c,s,x,y,Xmat,Smat,mu,StoppingCriteria
-
-def IterateAffine( A,b,c,s,x,y,Zero1,Identity, Zero2,Zero3,Smat, Zero4,Xmat,Sigma,alpha):
-    """
-    docstring
-    """
+#####################################################################################################
+## Solve the system and Update Vecttor Values
+#####################################################################################################
+    alphaP,AlphaD=AdaptiveStepSize( x,s,y,AllDeltas)
+    Sigma=AdaptiveCenteringParameter( x,s,y,AllDeltas,mu)
+    x,y,s,Xmat,Smat=UpdateValues(x,y,s,AllDeltas,alphaP,AlphaD)
     StoppingCriteria=x.T@s
     mu=StoppingCriteria/x.shape[0]
-    AugmentedSystem=GenerateAugmentedSystem(Zero1, A,Identity, Zero2,Zero3,Smat, Zero4,Xmat)
-    AugmentedB=GeneratAugmentedBAffine(A,b,c,s,x,y, Xmat,Smat)
-    AllDeltas = np.linalg.solve(AugmentedSystem,AugmentedB)
-    x,y,s,Xmat,Smat=UpdateValues(x,y,s,AllDeltas,alpha)
-    return b,c,s,x,y,Xmat,Smat,mu,StoppingCriteria,AllDeltas
+    print('Vector x is \n',x,'\n Vector s is \n',s,'\n mu is ',mu)
+    
+    
+    print('\n Deltas  are \n',AlphaD,alphaP)
+
+
+ 
