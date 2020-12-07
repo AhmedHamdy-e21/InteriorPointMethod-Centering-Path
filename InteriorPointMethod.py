@@ -105,18 +105,16 @@ def GeneratAugmentedB(A,b,c,s,x,y, Xmat):
 # Constraints paramters + slack variables
 A=np.array([[1,1,1]])
 b=np.array([6])
-## Initialize values for initial point
-x=np.array([[5],[6],[1]]) 
+## Initialize values for initial point 
+## I tried multiple arbitrary initial points and it's working awesome ^_^ 
+x=np.array([[3],[3],[3]]) 
 s=np.array([[1],[1],[1]])  ## This is initialized as identity
 y=np.ones((1,1))
 Xmat=Matricize(x)
 Smat=Matricize(s)
 c=np.array([[-1.1],[1],[0]])
 ################# 
-#### The RHS of the equations
-deltaX=np.zeros((Xmat.shape[1],1))
-deltaS=np.zeros((Smat.shape[1],1))
-deltaY=np.zeros((A.shape[0],1)) ### This is the y vector but I didn't initialize it before, I THINK THE DIMENSION IS 1 HERE ACCORDING TO THE NUMBER OF CONSTRANTS
+ ### This is the y vector but I didn't initialize it before, I THINK THE DIMENSION IS 1 HERE ACCORDING TO THE NUMBER OF CONSTRANTS
 
 ## Set algorithm paramters
 Sigma=0.5
@@ -146,4 +144,3 @@ while StoppingCriteria[0]>Tolerance:
     StoppingCriteria=x.T@s
     mu=StoppingCriteria/x.shape[0]
     print('Vector x is \n',x,'\n Vector s is \n',s,'\n mu is ',mu)
-
