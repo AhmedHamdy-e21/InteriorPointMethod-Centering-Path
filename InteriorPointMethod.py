@@ -75,7 +75,6 @@ def GenerateAugmentedSystem(Zero1, A,Identity, Zero2,Zero3,Smat, Zero4,Xmat):
     return AugmentedSystem
 
 
-
 def InitializeZerosAndIdentities(A,s,x):
     """
     docstring
@@ -86,8 +85,6 @@ def InitializeZerosAndIdentities(A,s,x):
     Zero3=np.zeros((1,x.shape[0]))
     Zero4=np.zeros((s.shape[0],1))
     return Zero1,Identity,Zero2,Zero3,Zero4
-
-
 
 def GeneratAugmentedB(A,b,c,s,x,y, Xmat):
     """
