@@ -88,6 +88,19 @@ def InitializeZerosAndIdentities(A,s,x):
     return Zero1,Identity,Zero2,Zero3,Zero4
 
 
+
+def GeneratAugmentedB(A,b,c,s,x,y, Xmat):
+    """
+    docstring
+    """
+    rXSe=Xmat@Smat@np.ones((Xmat.shape[0],1))
+    rMu=mu*Sigma*np.ones((Xmat.shape[0],1))
+    rc=A.T@y+s-c
+    rb=A@x-b
+    rLast=-rXSe+rMu
+    AugmentedB=np.concatenate((-rc,-rb,rLast),axis=0)
+    return AugmentedB
+
 #### First Trial:-d
 # Constraints paramters + slack variables
 A=np.array([[1,1,1]])
@@ -101,23 +114,13 @@ Smat=Matricize(s)
 c=np.array([[-1.1],[1],[0]])
 ################# 
 #### The RHS of the equations
-print('Shape of A is ', A.shape, "  Shape of y is ", y.shape)
-# rc=A.T@y+s-c
-# print(rc)
-
-# rb=A@x-b
-
-# print(rb)
-
-
-
 deltaX=np.zeros((Xmat.shape[1],1))
 deltaS=np.zeros((Smat.shape[1],1))
 deltaY=np.zeros((A.shape[0],1)) ### This is the y vector but I didn't initialize it before, I THINK THE DIMENSION IS 1 HERE ACCORDING TO THE NUMBER OF CONSTRANTS
 
 ## Set algorithm paramters
 Sigma=0.5
-alpha=0.3
+alpha=0.7
 StoppingCriteria=x.T@s
 print(StoppingCriteria[0])
 Tolerance=0.01
@@ -125,25 +128,13 @@ Tolerance=0.01
 Zero1,Identity,Zero2,Zero3,Zero4=InitializeZerosAndIdentities(A,s,x)
 AugmentedSystem=GenerateAugmentedSystem(Zero1, A,Identity, Zero2,Zero3,Smat, Zero4,Xmat)
 i=0
-# mu=StoppingCriteria/x.shape[0]
-# rXSe=Xmat@Smat@np.ones((Xmat.shape[0],1))
-# rMu=mu*Sigma*np.ones((Xmat.shape[0],1))
-# rLast=-rXSe+rMu
-# AugmentedB=np.concatenate((deltaX,np.array([[-6]]),rLast),axis=0)
-# print(deltaY.shape)
 
 while StoppingCriteria[0]>Tolerance:
     i=i+1
     print(i)
     mu=StoppingCriteria/x.shape[0]
-    #This is to edit the solution column
-    rXSe=Xmat@Smat@np.ones((Xmat.shape[0],1))
-    rMu=mu*Sigma*np.ones((Xmat.shape[0],1))
-    rc=A.T@y+s-c
-    rb=A@x-b
-    rLast=-rXSe+rMu
     AugmentedSystem=GenerateAugmentedSystem(Zero1, A,Identity, Zero2,Zero3,Smat, Zero4,Xmat)
-    AugmentedB=np.concatenate((-rc,-rb,rLast),axis=0) ## This is not so corrected you need to initialize zeros and the 
+    AugmentedB=GeneratAugmentedB(A,b,c,s,x,y, Xmat) ## This is not so corrected you need to initialize zeros and the 
     ## last values will be -XSe+ mu*sigma*e Because this is solution.
     ## But in terms of the deltas, they will come from the function return.
     ## Anyways I need to proceed of implying the solving function.
