@@ -1,6 +1,4 @@
 import InteriorPointMethodCentralPath as IP
-
-
 ##############################################################################################
 ### First Case
 ##############################################################################################
@@ -12,13 +10,19 @@ y=IP.np.ones((1,1))
 Xmat=IP.Matricize(x)
 Smat=IP.Matricize(s)
 c=IP.np.array([[-1.1],[1],[0]])
-##############################################################################################
 Xmat=IP.Matricize(x)
 Smat=IP.Matricize(s)
 Sigma=0.5
 alpha=0.7
-StoppingCriteria=x.T@s
-Tolerance=0.01
-### I'll solve the augmented system first and in the next version I'll implement Cholesky Factorization
+
 Zero1,Identity,Zero2,Zero3,Zero4=IP.InitializeZerosAndIdentities(A,s,x)
 i=0
+StoppingCriteria=x.T@s
+Tolerance=0.01
+while StoppingCriteria[0]>Tolerance:
+    i=i+1
+    print(i)
+    A,b,c,s,x,y,Xmat,Smat,mu,StoppingCriteria=IP.Iterate( A,b,c,s,x,y,Zero1,Identity, Zero2,Zero3,Smat, Zero4,Xmat,Sigma,alpha)
+    
+    print('Vector x is \n',x,'\n Vector s is \n',s,'\n mu is ',mu)
+
