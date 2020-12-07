@@ -15,8 +15,9 @@ def AdaptiveCenteringParameter( x,s,y,AllDeltas,mu):
     alphaPrimal,alphaDual=AdaptiveStepSize( x,s,y,AllDeltas)
     mux=x+alphaPrimal*AllDeltas[:x.shape[0]]
     mus=s+alphaDual*AllDeltas[x.shape[0]+y.shape[0]:x.shape[0]+s.shape[0]+y.shape[0]]
-    muaff=mux.T@mus
-    Sigma=(muaff/mu)
+    muaff=mux.T@mus/x.shape[0]
+    print(alphaPrimal,alphaDual)
+    Sigma=pow((muaff/mu),3)
     return Sigma,alphaPrimal,alphaDual
 
 
@@ -49,7 +50,7 @@ def CorrectorUpdate( x,y,s,AllDeltas,alphaPrimal,alphaDual):
 
 
 
-def IteratePredictorCorrector( A,b,c,s,x,y,Zero1,Identity, Zero2,Zero3,Smat, Zero4,Xmat,Sigma,alpha,AllDeltas):
+def IteratePredictorCorrector( A,b,c,s,x,y,Zero1,Identity, Zero2,Zero3,Smat, Zero4,Xmat,Sigma,alphaPrimal,alphaDual,AllDeltas):
     """
     docstring
     """
@@ -58,9 +59,15 @@ def IteratePredictorCorrector( A,b,c,s,x,y,Zero1,Identity, Zero2,Zero3,Smat, Zer
     AugmentedSystem=IP.GenerateAugmentedSystem(Zero1, A,Identity, Zero2,Zero3,Smat, Zero4,Xmat)
     AugmentedB=GeneratAugmentedBCorrector(A,b,c,s,x,y, Xmat,Smat,mu,Sigma,AllDeltas)
     AllDeltas = np.linalg.solve(AugmentedSystem,AugmentedB)
-    x,y,s,Xmat,Smat=IP.UpdateValues(x,y,s,AllDeltas,alpha)
+    x,y,s,Xmat,Smat= CorrectorUpdate( x,y,s,AllDeltas,alphaPrimal,alphaDual)
     return b,c,s,x,y,Xmat,Smat,mu,StoppingCriteria,AllDeltas
 
+
+  
+
+##############################################################################################
+### I think It's better first to choose fixed step size and check the predictor corrector algorithm. THEn edit the adaptive step size
+##############################################################################################
 
 
 ##############################################################################################
@@ -77,16 +84,18 @@ c=IP.np.array([[-1.1],[1],[0]])
 ##############################################################################################
 Xmat=IP.Matricize(x)
 Smat=IP.Matricize(s)
-Sigma=0.5
-alpha=0.7
+Sigma=0.0001
+alpha=alphaPrimal=alphaDual=0.6
 StoppingCriteria=x.T@s
 Tolerance=0.01
 ### I'll solve the augmented system first and in the next version I'll implement Cholesky Factorization
 Zero1,Identity,Zero2,Zero3,Zero4=IP.InitializeZerosAndIdentities(A,s,x)
 i=0
+b,c,s,x,y,Xmat,Smat,mu,StoppingCriteria,AllDeltas=IP.IterateAffine( A,b,c,s,x,y,Zero1,Identity, Zero2,Zero3,Smat, Zero4,Xmat,Sigma,alpha)
 while StoppingCriteria>0.01 :
-    b,c,s,x,y,Xmat,Smat,mu,StoppingCriteria,AllDeltas=IP.IterateAffine( A,b,c,s,x,y,Zero1,Identity, Zero2,Zero3,Smat, Zero4,Xmat,Sigma,alpha)
-    Sigma,alphaPrimal,alphaDual=AdaptiveCenteringParameter( x,s,y,AllDeltas,mu)
-    x,y,s,Xmat,Smat=CorrectorUpdate( x,y,s,AllDeltas,alphaPrimal,alphaDual)
-    b,c,s,x,y,Xmat,Smat,mu,StoppingCriteria,AllDeltas=IteratePredictorCorrector( A,b,c,s,x,y,Zero1,Identity, Zero2,Zero3,Smat, Zero4,Xmat,Sigma,alpha,AllDeltas)
-    print(mu)
+    print(x)
+    i=i+1
+    # Sigma,alphaPrimal,alphaDual=AdaptiveCenteringParameter( x,s,y,AllDeltas,mu)
+    b,c,s,x,y,Xmat,Smat,mu,StoppingCriteria,AllDeltas=IteratePredictorCorrector( A,b,c,s,x,y,Zero1,Identity, Zero2,Zero3,Smat, Zero4,Xmat,Sigma,alphaPrimal,alphaDual,AllDeltas)
+    print(x)
+    print('\n',i,'\n',mu)
