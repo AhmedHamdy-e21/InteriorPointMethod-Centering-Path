@@ -86,7 +86,7 @@ def InitializeZerosAndIdentities(A,s,x):
     Zero4=np.zeros((s.shape[0],A.shape[0]))
     return Zero1,Identity,Zero2,Zero3,Zero4
 
-def GeneratAugmentedB(A,b,c,s,x,y, Xmat):
+def GeneratAugmentedB(A,b,c,s,x,y, Xmat,mu,Sigma):
     """
     docstring
     """
@@ -95,6 +95,17 @@ def GeneratAugmentedB(A,b,c,s,x,y, Xmat):
     rc=A.T@y+s-c
     rb=A@x-b
     rLast=-rXSe+rMu
+    AugmentedB=np.concatenate((-rc,-rb,rLast),axis=0)
+    return AugmentedB
+
+def GeneratAugmentedBAffine(A,b,c,s,x,y, Xmat):
+    """
+    docstring
+    """
+    rXSe=Xmat@Smat@np.ones((Xmat.shape[0],1))
+    rc=A.T@y+s-c
+    rb=A@x-b
+    rLast=-rXSe
     AugmentedB=np.concatenate((-rc,-rb,rLast),axis=0)
     return AugmentedB
 
@@ -138,27 +149,30 @@ Smat=Matricize(s)
 Sigma=0.5
 alpha=0.7
 StoppingCriteria=x.T@s
-print(StoppingCriteria[0])
 Tolerance=0.01
 ### I'll solve the augmented system first and in the next version I'll implement Cholesky Factorization
 Zero1,Identity,Zero2,Zero3,Zero4=InitializeZerosAndIdentities(A,s,x)
-AugmentedSystem=GenerateAugmentedSystem(Zero1, A,Identity, Zero2,Zero3,Smat, Zero4,Xmat)
+
 i=0
+
+
+def Iterate( A,b,c,s,x,y,Zero1,Identity, Zero2,Zero3,Smat, Zero4,Xmat,Sigma):
+    """
+    docstring
+    """
+    StoppingCriteria=x.T@s
+    mu=StoppingCriteria/x.shape[0]
+    AugmentedSystem=GenerateAugmentedSystem(Zero1, A,Identity, Zero2,Zero3,Smat, Zero4,Xmat)
+    AugmentedB=GeneratAugmentedB(A,b,c,s,x,y, Xmat,mu,Sigma)
+    AllDeltas = np.linalg.solve(AugmentedSystem,AugmentedB)
+    x,y,s,Xmat,Smat=UpdateValues(x,y,s,AllDeltas)
+    return A,b,c,s,x,y,Xmat,Smat,mu,StoppingCriteria
+
 
 while StoppingCriteria[0]>Tolerance:
     i=i+1
     print(i)
-    mu=StoppingCriteria/x.shape[0]
-    AugmentedSystem=GenerateAugmentedSystem(Zero1, A,Identity, Zero2,Zero3,Smat, Zero4,Xmat)
-    AugmentedB=GeneratAugmentedB(A,b,c,s,x,y, Xmat) ## This is not so corrected you need to initialize zeros and the 
-    ## last values will be -XSe+ mu*sigma*e Because this is solution.
-    ## But in terms of the deltas, they will come from the function return.
-    ## Anyways I need to proceed of implying the solving function.
-    AllDeltas = np.linalg.solve(AugmentedSystem,AugmentedB)
-#####################################################################################################
-## Solve the system and Update Vecttor Values
-#####################################################################################################
-    x,y,s,Xmat,Smat=UpdateValues(x,y,s,AllDeltas)
-    StoppingCriteria=x.T@s
-    mu=StoppingCriteria/x.shape[0]
+    A,b,c,s,x,y,Xmat,Smat,mu,StoppingCriteria=Iterate( A,b,c,s,x,y,Zero1,Identity, Zero2,Zero3,Smat, Zero4,Xmat,Sigma)
+    
     print('Vector x is \n',x,'\n Vector s is \n',s,'\n mu is ',mu)
+
