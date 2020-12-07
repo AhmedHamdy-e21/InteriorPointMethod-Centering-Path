@@ -98,7 +98,24 @@ def GeneratAugmentedB(A,b,c,s,x,y, Xmat):
     AugmentedB=np.concatenate((-rc,-rb,rLast),axis=0)
     return AugmentedB
 
-#### First Trial:-d
+##############################################################################################
+### Second Case
+##############################################################################################
+# A=np.array([[1,1,1]])
+# b=np.array([6])
+# x=np.array([[3],[3],[3]]) 
+# s=np.array([[1],[1],[1]]) 
+# y=np.ones((1,1))
+# Xmat=Matricize(x)
+# Smat=Matricize(s)
+# c=np.array([[-1.1],[1],[0]])
+##############################################################################################
+
+
+
+##############################################################################################
+### Second Case
+##############################################################################################
 # Constraints paramters + slack variables
 A=np.array([[2,1,1,0],[1,3,0,1]])
 print(A.shape[0])
@@ -106,12 +123,14 @@ print(A.shape[0])
 b=np.array([[8],[8]])
 ## Initialize values for initial point 
 ## I tried multiple arbitrary initial points and it's working awesome ^_^ 
-x=np.array([[3],[3],[3],[4]]) 
-s=np.array([[1],[1],[1],[3]])  ## This is initialized as identity
+x=np.array([[3],[1],[0],[0]]) 
+s=np.array([[1],[1],[1],[1]])  ## This is initialized as identity
 y=np.ones((2,1))
+c=np.array([[-30],[-20],[0],[0]])
+##############################################################################################
 Xmat=Matricize(x)
 Smat=Matricize(s)
-c=np.array([[-30],[-20],[0],[0]])
+
 ################# 
  ### This is the y vector but I didn't initialize it before, I THINK THE DIMENSION IS 1 HERE ACCORDING TO THE NUMBER OF CONSTRANTS
 
