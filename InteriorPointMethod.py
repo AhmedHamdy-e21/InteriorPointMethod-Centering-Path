@@ -95,25 +95,42 @@ b=np.array([6])
 ## Initialize values for initial point
 x=np.array([[5],[6],[1]]) 
 s=np.array([[1],[1],[1]])  ## This is initialized as identity
-y=np.zeros(A.shape[0])
+y=np.ones((1,1))
 Xmat=Matricize(x)
 Smat=Matricize(s)
+c=np.array([[-1.1],[1],[0]])
 ################# 
+#### The RHS of the equations
+print('Shape of A is ', A.shape, "  Shape of y is ", y.shape)
+# rc=A.T@y+s-c
+# print(rc)
+
+# rb=A@x-b
+
+# print(rb)
+
+
+
 deltaX=np.zeros((Xmat.shape[1],1))
 deltaS=np.zeros((Smat.shape[1],1))
 deltaY=np.zeros((A.shape[0],1)) ### This is the y vector but I didn't initialize it before, I THINK THE DIMENSION IS 1 HERE ACCORDING TO THE NUMBER OF CONSTRANTS
 
 ## Set algorithm paramters
 Sigma=0.5
-alpha=0.9
+alpha=0.3
 StoppingCriteria=x.T@s
 print(StoppingCriteria[0])
-Tolerance=0.0001
+Tolerance=0.01
 ### I'll solve the augmented system first and in the next version I'll implement Cholesky Factorization
 Zero1,Identity,Zero2,Zero3,Zero4=InitializeZerosAndIdentities(A,s,x)
 AugmentedSystem=GenerateAugmentedSystem(Zero1, A,Identity, Zero2,Zero3,Smat, Zero4,Xmat)
 i=0
-
+# mu=StoppingCriteria/x.shape[0]
+# rXSe=Xmat@Smat@np.ones((Xmat.shape[0],1))
+# rMu=mu*Sigma*np.ones((Xmat.shape[0],1))
+# rLast=-rXSe+rMu
+# AugmentedB=np.concatenate((deltaX,np.array([[-6]]),rLast),axis=0)
+# print(deltaY.shape)
 
 while StoppingCriteria[0]>Tolerance:
     i=i+1
@@ -122,9 +139,11 @@ while StoppingCriteria[0]>Tolerance:
     #This is to edit the solution column
     rXSe=Xmat@Smat@np.ones((Xmat.shape[0],1))
     rMu=mu*Sigma*np.ones((Xmat.shape[0],1))
+    rc=A.T@y+s-c
+    rb=A@x-b
     rLast=-rXSe+rMu
     AugmentedSystem=GenerateAugmentedSystem(Zero1, A,Identity, Zero2,Zero3,Smat, Zero4,Xmat)
-    AugmentedB=np.concatenate((deltaX,deltaY,rLast),axis=0) ## This is not so corrected you need to initialize zeros and the 
+    AugmentedB=np.concatenate((-rc,-rb,rLast),axis=0) ## This is not so corrected you need to initialize zeros and the 
     ## last values will be -XSe+ mu*sigma*e Because this is solution.
     ## But in terms of the deltas, they will come from the function return.
     ## Anyways I need to proceed of implying the solving function.
@@ -135,5 +154,5 @@ while StoppingCriteria[0]>Tolerance:
     x,y,s,Xmat,Smat=UpdateValues(x,y,s,AllDeltas)
     StoppingCriteria=x.T@s
     mu=StoppingCriteria/x.shape[0]
-    print(s)
+    print('Vector x is \n',x,'\n Vector s is \n',s,'\n mu is ',mu)
 
