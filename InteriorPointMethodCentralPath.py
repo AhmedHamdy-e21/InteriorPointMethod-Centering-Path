@@ -56,7 +56,6 @@ def UpdateValues( x,y,s,AllDeltas):
     Smat=Matricize(s)
     return x,y,s,Xmat,Smat
 
-
 def Matricize( VectorToMatrix):
     """
     docstring
@@ -73,7 +72,6 @@ def GenerateAugmentedSystem(Zero1, A,Identity, Zero2,Zero3,Smat, Zero4,Xmat):
     AugmentedSubystem3=np.concatenate((Smat, Zero4,Xmat), axis=1)
     AugmentedSystem=np.concatenate((AugmentedSubystem1,AugmentedSubystem2,AugmentedSubystem3),axis=0)
     return AugmentedSystem
-
 
 def InitializeZerosAndIdentities(A,s,x):
     """
@@ -99,6 +97,7 @@ def GeneratAugmentedB(A,b,c,s,x,y, Xmat,mu,Sigma):
     return AugmentedB
 
 def GeneratAugmentedBAffine(A,b,c,s,x,y, Xmat):
+
     """
     docstring
     """
@@ -108,53 +107,6 @@ def GeneratAugmentedBAffine(A,b,c,s,x,y, Xmat):
     rLast=-rXSe
     AugmentedB=np.concatenate((-rc,-rb,rLast),axis=0)
     return AugmentedB
-
-##############################################################################################
-### Second Case
-##############################################################################################
-# A=np.array([[1,1,1]])
-# b=np.array([6])
-# x=np.array([[3],[3],[3]]) 
-# s=np.array([[1],[1],[1]]) 
-# y=np.ones((1,1))
-# Xmat=Matricize(x)
-# Smat=Matricize(s)
-# c=np.array([[-1.1],[1],[0]])
-##############################################################################################
-
-
-
-##############################################################################################
-### Second Case
-##############################################################################################
-# Constraints paramters + slack variables
-A=np.array([[2,1,1,0],[1,3,0,1]])
-print(A.shape[0])
-
-b=np.array([[8],[8]])
-## Initialize values for initial point 
-## I tried multiple arbitrary initial points and it's working awesome ^_^ 
-x=np.array([[3],[1],[0],[0]]) 
-s=np.array([[1],[1],[1],[1]])  ## This is initialized as identity
-y=np.ones((2,1))
-c=np.array([[-30],[-20],[0],[0]])
-##############################################################################################
-Xmat=Matricize(x)
-Smat=Matricize(s)
-
-################# 
- ### This is the y vector but I didn't initialize it before, I THINK THE DIMENSION IS 1 HERE ACCORDING TO THE NUMBER OF CONSTRANTS
-
-## Set algorithm paramters
-Sigma=0.5
-alpha=0.7
-StoppingCriteria=x.T@s
-Tolerance=0.01
-### I'll solve the augmented system first and in the next version I'll implement Cholesky Factorization
-Zero1,Identity,Zero2,Zero3,Zero4=InitializeZerosAndIdentities(A,s,x)
-
-i=0
-
 
 def Iterate( A,b,c,s,x,y,Zero1,Identity, Zero2,Zero3,Smat, Zero4,Xmat,Sigma):
     """
@@ -167,7 +119,41 @@ def Iterate( A,b,c,s,x,y,Zero1,Identity, Zero2,Zero3,Smat, Zero4,Xmat,Sigma):
     AllDeltas = np.linalg.solve(AugmentedSystem,AugmentedB)
     x,y,s,Xmat,Smat=UpdateValues(x,y,s,AllDeltas)
     return A,b,c,s,x,y,Xmat,Smat,mu,StoppingCriteria
-
+##############################################################################################
+### Second Case
+##############################################################################################
+# A=np.array([[1,1,1]])
+# b=np.array([6])
+# x=np.array([[3],[3],[3]]) 
+# s=np.array([[1],[1],[1]]) 
+# y=np.ones((1,1))
+# Xmat=Matricize(x)
+# Smat=Matricize(s)
+# c=np.array([[-1.1],[1],[0]])
+##############################################################################################
+##############################################################################################
+### Second Case
+##############################################################################################
+# Constraints paramters + slack variables
+A=np.array([[2,1,1,0],[1,3,0,1]])
+print(A.shape[0])
+b=np.array([[8],[8]])
+## Initialize values for initial point 
+## I tried multiple arbitrary initial points and it's working awesome ^_^ 
+x=np.array([[3],[1],[0],[0]]) 
+s=np.array([[1],[1],[1],[1]])  ## This is initialized as identity
+y=np.ones((2,1))
+c=np.array([[-30],[-20],[0],[0]])
+##############################################################################################
+Xmat=Matricize(x)
+Smat=Matricize(s)
+Sigma=0.5
+alpha=0.7
+StoppingCriteria=x.T@s
+Tolerance=0.01
+### I'll solve the augmented system first and in the next version I'll implement Cholesky Factorization
+Zero1,Identity,Zero2,Zero3,Zero4=InitializeZerosAndIdentities(A,s,x)
+i=0
 
 while StoppingCriteria[0]>Tolerance:
     i=i+1
