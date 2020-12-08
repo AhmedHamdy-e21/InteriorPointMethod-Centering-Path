@@ -82,6 +82,7 @@ def Plot(ihist,OFhist,X,Y,i):
     fig= plt.figure(i)
     ax=fig.add_subplot(111)
     ax.plot(ihist,OFhist,'r-',label="fmax")
+    ax.plot(ihist,OFhist,'go',label="fmax")
     ax.set_xlabel(X)
     ax.set_ylabel(Y)
     
