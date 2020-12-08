@@ -72,57 +72,75 @@ def ObjectiveFunction1(x1,x2):
     """
     docstring
     """
-    return -30*x1-20*x2
+    return -1.1*x1-x2
 
-def Plot( parameter_list):
+def ObjectiveFunction2(x1,x2):
     """
     docstring
     """
-    ## plot 
-    fig= plt.figure()
+    return -30*x1-20*x2
+
+# def Plot( parameter_list):
+#     """
+#     docstring
+#     """
+#     ## plot 
+#     fig= plt.figure()
+#     ax=fig.add_subplot(111)
+#     # Plot the function
+#     ax.plot(x,f(x),'g-',label="f(x)")
+#     # Plot the minima
+#     xmins=np.array([xmin_global,xmin_local])
+#     ax.plot(xmins,f(xmins),'go',label="Minima")
+#     # Plot the roots
+#     roots=np.array([root.x,root2.x])
+#     ax.plot(roots,f(roots),'kv',label="Roots")
+#     ##zoom in around roots and mimima
+#     # ax.margins(x=-.02,y=5) 
+#     # ax.legend(loc='best')
+#     ax.set_xlabel('x')
+#     ax.set_ylabel('f(x)')
+#     ax.axhline(0,color="red")
+#     plt.show()
+#     pass
+
+def Plot(ihist,OFhist,X,Y,i):
+    """
+    docstring
+    """
+    fig= plt.figure(i)
     ax=fig.add_subplot(111)
-    # Plot the function
-    ax.plot(x,f(x),'g-',label="f(x)")
-    # Plot the minima
-    xmins=np.array([xmin_global,xmin_local])
-    ax.plot(xmins,f(xmins),'go',label="Minima")
-    # Plot the roots
-    roots=np.array([root.x,root2.x])
-    ax.plot(roots,f(roots),'kv',label="Roots")
-    ##zoom in around roots and mimima
-    # ax.margins(x=-.02,y=5) 
-    # ax.legend(loc='best')
-    ax.set_xlabel('x')
-    ax.set_ylabel('f(x)')
-    ax.axhline(0,color="red")
-    plt.show()
+    ax.plot(ihist,OFhist,'r-',label="fmax")
+    ax.set_xlabel(X)
+    ax.set_ylabel(Y)
+    
     pass
 ##############################################################################################
 ### First Case
 ##############################################################################################
-# A=IP.np.array([[1,1,1]])
-# b=IP.np.array([6])
-# x=IP.np.array([[5],[6],[1]]) 
-# s=IP.np.array([[1],[1],[1]]) 
-# y=IP.np.ones((1,1))
-# Xmat=IP.Matricize(x)
-# Smat=IP.Matricize(s)
-# c=IP.np.array([[-1.1],[1],[0]])
+A=IP.np.array([[1,1,1]])
+b=IP.np.array([6])
+x=IP.np.array([[5],[6],[1]]) 
+s=IP.np.array([[1],[1],[1]]) 
+y=IP.np.ones((1,1))
+Xmat=IP.Matricize(x)
+Smat=IP.Matricize(s)
+c=IP.np.array([[-1.1],[1],[0]])
 ##############################################################################################
 
 ##############################################################################################
 ### Second Case
 ##############################################################################################
 # Constraints paramters + slack variables
-A=IP.np.array([[2,1,1,0],[1,3,0,1]])
-print(A.shape[0])
-b=IP.np.array([[8],[8]])
-## Initialize values for initial point 
-## I tried multiple arbitrary initial points and it's working awesome ^_^ 
-x=IP.np.array([[3],[3],[0],[0]]) 
-s=IP.np.array([[1],[1],[1],[1]])  ## This is initialized as identity
-y=IP.np.ones((2,1))
-c=IP.np.array([[-30],[-20],[0],[0]])
+# A=IP.np.array([[2,1,1,0],[1,3,0,1]])
+# print(A.shape[0])
+# b=IP.np.array([[8],[8]])
+# ## Initialize values for initial point 
+# ## I tried multiple arbitrary initial points and it's working awesome ^_^ 
+# x=IP.np.array([[3],[3],[0],[0]]) 
+# s=IP.np.array([[1],[1],[1],[1]])  ## This is initialized as identity
+# y=IP.np.ones((2,1))
+# c=IP.np.array([[-30],[-20],[0],[0]])
 ##############################################################################################
 Xmat=IP.Matricize(x)
 Smat=IP.Matricize(s)
@@ -160,27 +178,20 @@ ComplementaryConditionX2=ComplementaryCondition[:,1,:]
 print(ihist)
 
 
-fig= plt.figure()
-ax=fig.add_subplot(111)
-# # Plot the function
-ax.plot(ihist,OFhist,'r-',label="fmax")
-ax.set_xlabel('Iterations')
-ax.set_ylabel('Objective Function')
+# fig= plt.figure()
+# ax=fig.add_subplot(111)
+# # # Plot the Objective function
+# ax.plot(ihist,OFhist,'r-',label="fmax")
+# ax.set_xlabel('Iterations')
+# ax.set_ylabel('Objective Function')
 
 
+Plot(ihist,OFhist,'Iterations','Objective Function',1)
+Plot(ComplementaryConditionX1,ComplementaryConditionX2,'X1S1','X2S2',2)
+Plot(xhist[:,0,:],xhist[:,1,:],'X1','X2',3)
 
-# # Plot the minima
-# xmins=np.array([xmin_global,xmin_local])
-# ax.plot(xmins,f(xmins),'go',label="Minima")
-# # Plot the roots
-# roots=np.array([root.x,root2.x])
-# ax.plot(roots,f(roots),'kv',label="Roots")
-# ##zoom in around roots and mimima
-# # ax.margins(x=-.02,y=5) 
-# # ax.legend(loc='best')
-
-# ax.axhline(0,color="red")
 plt.show()
+
 
 
 
