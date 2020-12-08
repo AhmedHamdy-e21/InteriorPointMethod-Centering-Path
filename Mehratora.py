@@ -72,7 +72,7 @@ def ObjectiveFunction1(x1,x2):
     """
     docstring
     """
-    return -1.1*x1-x2
+    return -30*x1-20*x2
 
 def Plot( parameter_list):
     """
@@ -100,29 +100,29 @@ def Plot( parameter_list):
 ##############################################################################################
 ### First Case
 ##############################################################################################
-A=IP.np.array([[1,1,1]])
-b=IP.np.array([6])
-x=IP.np.array([[5],[6],[1]]) 
-s=IP.np.array([[1],[1],[1]]) 
-y=IP.np.ones((1,1))
-Xmat=IP.Matricize(x)
-Smat=IP.Matricize(s)
-c=IP.np.array([[-1.1],[1],[0]])
+# A=IP.np.array([[1,1,1]])
+# b=IP.np.array([6])
+# x=IP.np.array([[5],[6],[1]]) 
+# s=IP.np.array([[1],[1],[1]]) 
+# y=IP.np.ones((1,1))
+# Xmat=IP.Matricize(x)
+# Smat=IP.Matricize(s)
+# c=IP.np.array([[-1.1],[1],[0]])
 ##############################################################################################
 
 ##############################################################################################
 ### Second Case
 ##############################################################################################
-# # Constraints paramters + slack variables
-# A=IP.np.array([[2,1,1,0],[1,3,0,1]])
-# print(A.shape[0])
-# b=IP.np.array([[8],[8]])
-# ## Initialize values for initial point 
-# ## I tried multiple arbitrary initial points and it's working awesome ^_^ 
-# x=IP.np.array([[3],[3],[0],[0]]) 
-# s=IP.np.array([[1],[1],[1],[1]])  ## This is initialized as identity
-# y=IP.np.ones((2,1))
-# c=IP.np.array([[-30],[-20],[0],[0]])
+# Constraints paramters + slack variables
+A=IP.np.array([[2,1,1,0],[1,3,0,1]])
+print(A.shape[0])
+b=IP.np.array([[8],[8]])
+## Initialize values for initial point 
+## I tried multiple arbitrary initial points and it's working awesome ^_^ 
+x=IP.np.array([[3],[3],[0],[0]]) 
+s=IP.np.array([[1],[1],[1],[1]])  ## This is initialized as identity
+y=IP.np.ones((2,1))
+c=IP.np.array([[-30],[-20],[0],[0]])
 ##############################################################################################
 Xmat=IP.Matricize(x)
 Smat=IP.Matricize(s)
