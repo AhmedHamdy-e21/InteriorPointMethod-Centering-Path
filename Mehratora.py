@@ -88,3 +88,15 @@ def Plot(ihist,OFhist,X,Y,i):
     pass
 
 
+def PlotAll( xhist,shist,ihist,OFhist):
+    """
+    docstring
+    """
+    ComplementaryCondition=xhist*shist
+    ComplementaryConditionX1=ComplementaryCondition[:,0,:]
+    ComplementaryConditionX2=ComplementaryCondition[:,1,:]
+
+    Plot(ihist,OFhist,'Iterations','Objective Function',1)
+    Plot(ComplementaryConditionX1,ComplementaryConditionX2,'X1S1','X2S2',2)
+    Plot(xhist[:,0,:],xhist[:,1,:],'X1','X2',3)
+    pass

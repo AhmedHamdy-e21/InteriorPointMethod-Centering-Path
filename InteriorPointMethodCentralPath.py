@@ -44,6 +44,7 @@ the number of iterations and function values.
 import numpy as np
 from numpy.linalg import inv as inv
 from sympy import *
+import matplotlib.pyplot as plt
 
 def UpdateValues( x,y,s,AllDeltas,alpha):
     """
@@ -61,6 +62,11 @@ def ObjectiveFunction1(x1,x2):
     docstring
     """
     return -1.1*x1-x2
+def ObjectiveFunction3(x1,x2):
+    """
+    docstring
+    """
+    return -5*x1-4*x2
 
 def ObjectiveFunction2(x1,x2):
     """
@@ -68,17 +74,6 @@ def ObjectiveFunction2(x1,x2):
     """
     return -30*x1-20*x2
 
-def Plot(ihist,OFhist,X,Y,i):
-    """
-    docstring
-    """
-    fig= plt.figure(i)
-    ax=fig.add_subplot(111)
-    ax.plot(ihist,OFhist,'r-',label="fmax")
-    ax.set_xlabel(X)
-    ax.set_ylabel(Y)
-    
-    pass
 
 def Matricize( VectorToMatrix):
     """
@@ -155,3 +150,28 @@ def IterateAffine( A,b,c,s,x,y,Zero1,Identity, Zero2,Zero3,Smat, Zero4,Xmat,Sigm
     AllDeltas = np.linalg.solve(AugmentedSystem,AugmentedB)
     x,y,s,Xmat,Smat=UpdateValues(x,y,s,AllDeltas,alpha)
     return b,c,s,x,y,Xmat,Smat,mu,StoppingCriteria,AllDeltas
+
+def Plot(ihist,OFhist,X,Y,i):
+    """
+    docstring
+    """
+    fig= plt.figure(i)
+    ax=fig.add_subplot(111)
+    ax.plot(ihist,OFhist,'r-',label="fmax")
+    ax.set_xlabel(X)
+    ax.set_ylabel(Y)
+
+    pass
+
+def PlotAll( xhist,shist,ihist,OFhist):
+    """
+    docstring
+    """
+    ComplementaryCondition=xhist*shist
+    ComplementaryConditionX1=ComplementaryCondition[:,0,:]
+    ComplementaryConditionX2=ComplementaryCondition[:,1,:]
+
+    Plot(ihist,OFhist,'Iterations','Objective Function',1)
+    Plot(ComplementaryConditionX1,ComplementaryConditionX2,'X1S1','X2S2',2)
+    Plot(xhist[:,0,:],xhist[:,1,:],'X1','X2',3)
+    pass
