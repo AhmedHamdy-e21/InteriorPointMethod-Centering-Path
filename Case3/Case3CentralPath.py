@@ -1,16 +1,19 @@
+import sys
+import os
+sys.path.append(os.path.abspath(sys.path[0] + '/..'))
 from InteriorPointMethodCentralPath import *
 ##############################################################################################
 ### First Case
 ##############################################################################################
 
-A=np.array([[1,1,1]])
-b=np.array([6])
-x=np.array([[5],[6],[1]]) 
-s=np.array([[1],[1],[1]]) 
-y=np.ones((1,1))
+A=np.array([[6,4,1,0,0,0],[1,2,0,1,0,0],[-1,1,0,0,1,0],[0,1,0,0,0,1]])
+b=np.array([[24],[6],[1],[2]])
+x=np.array([[5],[6],[1],[2],[1],[1]]) 
+s=np.array([[1],[1],[1],[1],[1],[1]]) 
+y=np.ones((4,1))
 Xmat=Matricize(x)
 Smat=Matricize(s)
-c=np.array([[-1.1],[1],[0]])
+c=np.array([[-5],[-4],[0],[0],[0],[0]])
 Xmat=Matricize(x)
 Smat=Matricize(s)
 Sigma=0.1
@@ -36,7 +39,9 @@ while min(StoppingCriteria)>Tolerance:
 xhist=np.array(xhist)
 shist=np.array(shist)
 ihist=np.array(ihist)
-OFhist=ObjectiveFunction1(xhist[:,0,:],xhist[:,1,:])
+OFhist=ObjectiveFunction3(xhist[:,0,:],xhist[:,1,:])
 PlotAll(xhist,shist,ihist,-OFhist)
+
 plt.show()
 
+ 

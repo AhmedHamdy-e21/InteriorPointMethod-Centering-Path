@@ -1,18 +1,25 @@
+import sys
+import os
+sys.path.append(os.path.abspath(sys.path[0] + '/..'))
 from Mehratora import *
 ##############################################################################################
-### First Case
+### Second Case
 ##############################################################################################
-A=IP.np.array([[1,1,1]])
-b=IP.np.array([6])
-x=IP.np.array([[5],[6],[1]]) 
-s=IP.np.array([[1],[1],[1]]) 
-y=IP.np.ones((1,1))
-c=IP.np.array([[-1.1],[1],[0]])
+# Constraints paramters + slack variables
+A=IP.np.array([[2,1,1,0],[1,3,0,1]])
+print(A.shape[0])
+b=IP.np.array([[8],[8]])
+## Initialize values for initial point 
+## I tried multiple arbitrary initial points and it's working awesome ^_^ 
+x=IP.np.array([[3],[3],[0],[0]]) 
+s=IP.np.array([[1],[1],[1],[1]])  ## This is initialized as identity
+y=IP.np.ones((2,1))
+c=IP.np.array([[-30],[-20],[0],[0]])
 ##############################################################################################
 Xmat=IP.Matricize(x)
 Smat=IP.Matricize(s)
 Sigma=0.5
-alpha=alphaPrimal=alphaDual=0.5
+alpha=0.5
 StoppingCriteria=x.T@s
 Tolerance=0.1
 Zero1,Identity,Zero2,Zero3,Zero4=IP.InitializeZerosAndIdentities(A,s,x)
@@ -20,6 +27,7 @@ i=0
 xhist=[]
 shist=[]
 ihist=[]
+
 while StoppingCriteria>Tolerance:
     ihist.append(i)
     i=i+1
@@ -34,6 +42,7 @@ while StoppingCriteria>Tolerance:
 xhist=np.array(xhist)
 shist=np.array(shist)
 ihist=np.array(ihist)
-OFhist=ObjectiveFunction1(xhist[:,0,:],xhist[:,1,:])
-PlotAll(xhist,shist,ihist,OFhist)
+OFhist=ObjectiveFunction2(xhist[:,0,:],xhist[:,1,:])
+
+PlotAll(xhist,shist,ihist,-OFhist)
 plt.show()
