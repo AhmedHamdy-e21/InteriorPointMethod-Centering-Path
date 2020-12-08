@@ -56,6 +56,30 @@ def UpdateValues( x,y,s,AllDeltas,alpha):
     Smat=Matricize(s)
     return x,y,s,Xmat,Smat
 
+def ObjectiveFunction1(x1,x2):
+    """
+    docstring
+    """
+    return -1.1*x1-x2
+
+def ObjectiveFunction2(x1,x2):
+    """
+    docstring
+    """
+    return -30*x1-20*x2
+
+def Plot(ihist,OFhist,X,Y,i):
+    """
+    docstring
+    """
+    fig= plt.figure(i)
+    ax=fig.add_subplot(111)
+    ax.plot(ihist,OFhist,'r-',label="fmax")
+    ax.set_xlabel(X)
+    ax.set_ylabel(Y)
+    
+    pass
+
 def Matricize( VectorToMatrix):
     """
     docstring
