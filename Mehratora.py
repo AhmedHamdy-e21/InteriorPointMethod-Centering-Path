@@ -26,7 +26,6 @@ def AdaptiveCenteringParameter( x,s,y,AllDeltas,mu):
     Sigma=pow((muaff/mu),3)
     return Sigma,alphaPrimal,alphaDual
 
-
 def GeneratAugmentedBCorrector(A,b,c,s,x,y, Xmat,Smat,mu,Sigma,AllDeltas):
     """
     docstring
@@ -42,7 +41,6 @@ def GeneratAugmentedBCorrector(A,b,c,s,x,y, Xmat,Smat,mu,Sigma,AllDeltas):
     AugmentedB=np.concatenate((-rc,-rb,rLast),axis=0)
     return AugmentedB
 
-
 def CorrectorUpdate( x,y,s,AllDeltas,alphaPrimal,alphaDual):
     """
     docstring
@@ -53,8 +51,6 @@ def CorrectorUpdate( x,y,s,AllDeltas,alphaPrimal,alphaDual):
     Xmat=IP.Matricize(x)
     Smat=IP.Matricize(s)
     return x,y,s,Xmat,Smat
-
-
 
 def IteratePredictorCorrector( A,b,c,s,x,y,Zero1,Identity, Zero2,Zero3,Smat, Zero4,Xmat,Sigma,alphaPrimal,alphaDual,AllDeltas):
     """
@@ -79,31 +75,6 @@ def ObjectiveFunction2(x1,x2):
     docstring
     """
     return -30*x1-20*x2
-
-# def Plot( parameter_list):
-#     """
-#     docstring
-#     """
-#     ## plot 
-#     fig= plt.figure()
-#     ax=fig.add_subplot(111)
-#     # Plot the function
-#     ax.plot(x,f(x),'g-',label="f(x)")
-#     # Plot the minima
-#     xmins=np.array([xmin_global,xmin_local])
-#     ax.plot(xmins,f(xmins),'go',label="Minima")
-#     # Plot the roots
-#     roots=np.array([root.x,root2.x])
-#     ax.plot(roots,f(roots),'kv',label="Roots")
-#     ##zoom in around roots and mimima
-#     # ax.margins(x=-.02,y=5) 
-#     # ax.legend(loc='best')
-#     ax.set_xlabel('x')
-#     ax.set_ylabel('f(x)')
-#     ax.axhline(0,color="red")
-#     plt.show()
-#     pass
-
 def Plot(ihist,OFhist,X,Y,i):
     """
     docstring
@@ -115,6 +86,8 @@ def Plot(ihist,OFhist,X,Y,i):
     ax.set_ylabel(Y)
     
     pass
+
+
 ##############################################################################################
 ### First Case
 ##############################################################################################
@@ -171,20 +144,15 @@ while StoppingCriteria>Tolerance:
 xhist=np.array(xhist)
 shist=np.array(shist)
 ihist=np.array(ihist)
+
 OFhist=ObjectiveFunction1(xhist[:,0,:],xhist[:,1,:])
+
+
+# OFhist=ObjectiveFunction2(xhist[:,0,:],xhist[:,1,:]) ## Case Two
+
 ComplementaryCondition=xhist*shist
 ComplementaryConditionX1=ComplementaryCondition[:,0,:]
 ComplementaryConditionX2=ComplementaryCondition[:,1,:]
-print(ihist)
-
-
-# fig= plt.figure()
-# ax=fig.add_subplot(111)
-# # # Plot the Objective function
-# ax.plot(ihist,OFhist,'r-',label="fmax")
-# ax.set_xlabel('Iterations')
-# ax.set_ylabel('Objective Function')
-
 
 Plot(ihist,OFhist,'Iterations','Objective Function',1)
 Plot(ComplementaryConditionX1,ComplementaryConditionX2,'X1S1','X2S2',2)
@@ -195,3 +163,100 @@ plt.show()
 
 
 
+############### python solver
+import numpy as np
+import scipy.sparse as sparse
+import scipy.sparse.linalg as linalg
+
+
+
+#####################################################################3
+def newtonDec(df, dx):
+	return np.dot(df,dx)
+
+# assumes that x + alpha*dx can be made positive
+def linesearch(x, dx):
+   alpha = 1.
+   while not np.all( x + alpha*dx > 0):
+   		alpha *= 0.1
+   return alpha
+
+# min cx
+
+def solve_lp2(A, b, c, gamma, xstart=None):
+	#x = np.ones(A.shape[1])
+	#lam = np.zeros(b.shape)
+	xsize = A.shape[1]
+	if xstart is not None:
+		x = xstart
+	else:
+		#xlam = np.ones(xsize + b.size)
+		x = np.ones(xsize) # xlam[:xsize]
+		#lam = xlam[xsize:]
+	while True :
+		print("Iterate")
+		H = sparse.bmat( [[ sparse.diags(gamma / x**2)   ,   A.T ],
+		                  [ A  ,                         0 ]]  )
+
+		dfdx = c - gamma / x #+  A.T@lam 
+		dfdlam = A@x - b
+		df = np.concatenate((dfdx, dfdlam))#np.zeros(b.size))) # dfdlam))
+		#np.concatenate( , A@x - b)
+		dxlam = linalg.spsolve(H,df)
+		dx = - dxlam[:xsize]
+		lam = dxlam[xsize:]
+
+		alpha = linesearch(x,dx)
+		x += alpha * dx
+		#lam += dlam
+		if newtonDec(dfdx,dx) >= -1e-10:
+			print("stop")
+			break
+
+	return x, lam
+
+
+def solve_lp(A,b,c, xstart=None):
+	gamma = 1.0
+	xsize = A.shape[1]
+	x = np.ones(xsize)
+	for i in range(8):
+		x, lam = solve_lp2(A, b, c, gamma, xstart=x)
+		gamma *= 0.1
+	return x, lam
+
+print(solve_lp(A,b,c))
+
+
+
+
+def BB(A, b, c, best, xhint = None):
+	picked = np.zeros(xsize)
+	picked[pickvar] = 1
+	Anew = sparse.hstack((A, picked))
+	bnew = np.concatenate((b,choice))
+	x, lam = np.dot(c,x)
+	if lp_solve(Anew, bnew, c) < best:
+		best, x = BB(Anew, bnew , c, best, xhint)
+	return best, x
+
+
+
+
+'''
+#min  cx + gamma * ln(x)
+# s.t. Ax = b
+
+# cx + gamma * ln(x) + lambda (Ax - b)
+
+#gradient 
+delx = c + gamma * 1/x + lambda A
+dellam = Ax - b
+# hess
+dlx = A
+dxl = A.T
+dxx = - gamma (1/x**2)
+
+
+H @ (x l) = (delx dell)
+'''
